@@ -1,0 +1,67 @@
+# Import Libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+
+# Load Dataset
+df = pd.read_csv("bank.csv", sep=';')
+
+# Display first 5 rows
+print("First 5 Rows:")
+print(df.head())
+
+# Check missing values
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+# Convert categorical columns to numeric
+le = LabelEncoder()
+
+for column in df.columns:
+    if df[column].dtype == "object":
+        df[column] = le.fit_transform(df[column])
+
+# Features and Target
+X = df.drop("y", axis=1)
+y = df["y"]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train Decision Tree Classifier
+model = DecisionTreeClassifier(
+    criterion="entropy",
+    max_depth=5,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# Visualize Decision Tree
+plt.figure(figsize=(18,10))
+plot_tree(
+    model,
+    feature_names=X.columns,
+    class_names=["No", "Yes"],
+    filled=True,
+    rounded=True
+)
+plt.title("Decision Tree Classifier")
+plt.show()
